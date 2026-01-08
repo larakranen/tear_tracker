@@ -6,7 +6,7 @@ def save_entry(ts, dur, loc, cat, intns, alone, ppl, period, nts):
     # 1. Open the connection
     conn = sqlite3.connect('tears.db')
     c = conn.cursor()
-    
+    print(ts)
     # 2. The SQL logic
     query = '''INSERT INTO crying_logs 
                (timestamp, duration_minutes, location, category, intensity, was_alone, people_involved, is_period, notes) 
@@ -45,7 +45,8 @@ if is_manual:
         manual_time = st.time_input("Time of cry", value=datetime.now())
     
     # Combine date and time into one string for the database
-    timestamp_to_save = f"{manual_date} {manual_time}"
+    combined_dt = datetime.combine(manual_date, manual_time)
+    timestamp_to_save = combined_dt.strftime("%Y-%m-%d %H:%M:%S")
 else:
     # Use the current time automatically
     timestamp_to_save = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
