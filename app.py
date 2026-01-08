@@ -36,22 +36,39 @@ category_map = {
 }
 
 # In case the cry was not logged on time
-is_manual = st.checkbox("Log for a different time? (Back-logging)")
+# 1. Initialize the "Sticky" variables if they don't exist yet
+if 'saved_date' not in st.session_state:
+    st.session_state.saved_date = datetime.now().date()
+if 'saved_time' not in st.session_state:
+    st.session_state.saved_time = datetime.now().time()
+
+# 2. The Checkbox
+is_manual = st.checkbox("Back-logging (different time)?")
+
+# 3. Logic: If manual, show widgets linked to the "Sticky" variables
 if is_manual:
     col_date, col_time = st.columns(2)
     with col_date:
-        manual_date = st.date_input("Date of cry", value=datetime.now())
+        # NOTICE: We remove 'value=' and use 'key='
+        # 'key' automatically syncs this widget to session_state
+        manual_date = st.date_input("Date", key='saved_date')
     with col_time:
-        manual_time = st.time_input("Time of cry", value=datetime.now())
+        manual_time = st.time_input("Time", key='saved_time')
     
-    # Combine date and time into one string for the database
-    combined_dt = datetime.combine(manual_date, manual_time)
-    timestamp_to_save = combined_dt.strftime("%Y-%m-%d %H:%M:%S")
-else:
-    # Use the current time automatically
-    timestamp_to_save = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Combine them safely
+    dt_combined = datetime.combine(manual_date, manual_time)
+    timestamp_to_save = dt_combined.strftime("%Y-%m-%d %H:%M:%S")
 
-st.caption(f"Logging at: {timestamp_to_save}")
+else:
+    # If not manual, just take the current time right now
+    # We also update the session state so if you toggle the box, it starts at "Now"
+    current_dt = datetime.now()
+    st.session_state.saved_date = current_dt.date()
+    st.session_state.saved_time = current_dt.time()
+    
+    timestamp_to_save = current_dt.strftime("%Y-%m-%d %H:%M:%S")
+
+st.caption(f"Logging for: {timestamp_to_save}")
 
 # Start the form layour. Use columns to make it look nice on mobile
 col1, col2 = st.columns(2)
